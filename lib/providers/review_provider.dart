@@ -44,4 +44,21 @@ class ReviewProvider with ChangeNotifier {
       return false;
     }
   }
+
+  Future<bool> deleteReview(
+      int reviewId, int restaurantId, BuildContext context) async {
+    try {
+      await _databaseService.deleteReview(reviewId);
+      // Refresh local list after deletion
+      await loadReviews(restaurantId, context);
+      return true;
+    } catch (e, stack) {
+      debugPrint('Error deleting review: $e');
+      debugPrintStack(stackTrace: stack);
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        const SnackBar(content: Text('Failed to delete review')),
+      );
+      return false;
+    }
+  }
 }

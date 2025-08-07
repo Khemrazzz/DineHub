@@ -249,6 +249,30 @@ class DatabaseService {
     return reviewId;
   }
 
+  Future<void> deleteReview(int id) async {
+    final db = await database;
+    if (db == null) return;
+
+    // Get the restaurant ID before deleting the review
+    final result = await db.query(
+      'reviews',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (result.isEmpty) return;
+    final int restaurantId = result.first['restaurantId'] as int;
+
+    await db.delete(
+      'reviews',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    await _updateRestaurantRating(restaurantId);
+  }
+
   Future<void> _updateRestaurantRating(int restaurantId) async {
     final db = await database;
     if (db == null) return;
