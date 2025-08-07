@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/restaurant_model.dart';
-import '../models/menu_model.dart';
+import '../models/restaurant.dart';
+import '../models/menu_item.dart';
+import '../services/database_service.dart';
 
 class ManageMenusScreen extends StatefulWidget {
   final Restaurant restaurant;
@@ -11,17 +12,32 @@ class ManageMenusScreen extends StatefulWidget {
 }
 
 class _ManageMenusScreenState extends State<ManageMenusScreen> {
-  late List<MenuItem> _menu;
+  final DatabaseService _db = DatabaseService();
+  List<MenuItem> _menu = [];
 
   @override
   void initState() {
     super.initState();
-    _menu = List<MenuItem>.from(widget.restaurant.menu);
+    _loadMenu();
+  }
+
+  Future<void> _loadMenu() async {
+    final restaurantId = widget.restaurant.id;
+    if (restaurantId != null) {
+      final items = await _db.getMenuItems(restaurantId);
+      setState(() => _menu = items);
+    }
   }
 
   void _addItem() {
     setState(() {
-      _menu.add(MenuItem(id: DateTime.now().toString(), name: 'New Item', price: 0));
+      _menu.add(
+        MenuItem(
+          restaurantId: widget.restaurant.id ?? 0,
+          name: 'New Item',
+          price: 0.0,
+        ),
+      );
     });
   }
 

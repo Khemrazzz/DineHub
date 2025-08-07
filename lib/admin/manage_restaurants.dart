@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/restaurant_model.dart';
-import '../services/restaurant_service.dart';
+import '../models/restaurant.dart';
+import '../services/database_service.dart';
 import 'add_restaurant.dart';
 import 'edit_restaurant.dart';
 import 'manage_menus.dart';
@@ -13,7 +13,7 @@ class ManageRestaurantsScreen extends StatefulWidget {
 }
 
 class _ManageRestaurantsScreenState extends State<ManageRestaurantsScreen> {
-  final RestaurantService _service = RestaurantService();
+  final DatabaseService _service = DatabaseService();
   List<Restaurant> _restaurants = [];
 
   @override
@@ -23,7 +23,7 @@ class _ManageRestaurantsScreenState extends State<ManageRestaurantsScreen> {
   }
 
   Future<void> _load() async {
-    final data = await _service.fetchRestaurants();
+    final data = await _service.getRestaurants();
     setState(() => _restaurants = data);
   }
 

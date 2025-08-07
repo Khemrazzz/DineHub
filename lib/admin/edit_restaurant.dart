@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/restaurant_model.dart';
+import '../models/restaurant.dart';
 
 class EditRestaurantScreen extends StatefulWidget {
   final Restaurant restaurant;
