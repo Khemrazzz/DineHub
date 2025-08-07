@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../screens/home_screen.dart';
 import '../screens/map_view_screen.dart';
-import '../screens/about_page.dart';
+import '../screens/about_screen.dart';
 
 class DineHubNavBar extends StatelessWidget {
   final int currentIndex;
@@ -17,8 +17,8 @@ class DineHubNavBar extends StatelessWidget {
       case 1:
         destination = const MapViewScreen();
         break;
-        default:
-          destination = const AboutPage();
+      default:
+        destination = const AboutScreen();
     }
     Navigator.pushReplacement(
       context,
@@ -31,7 +31,6 @@ class DineHubNavBar extends StatelessWidget {
     return BottomNavigationBar(
       currentIndex: currentIndex,
       onTap: (i) => _navigate(context, i),
-      selectedItemColor: const Color(0xFFFF6B6B),
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
         BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
