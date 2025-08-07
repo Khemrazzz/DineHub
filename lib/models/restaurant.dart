@@ -1,3 +1,5 @@
+import '../services/location_service.dart';
+
 class Restaurant {
   final int? id;
   final String name;
@@ -53,5 +55,9 @@ class Restaurant {
     );
   }
 
-  String get distance => '${(rating * 0.5).toStringAsFixed(1)}km';
+  String distance(double userLat, double userLon) {
+    final distanceInKm =
+        LocationService().calculateDistance(userLat, userLon, latitude, longitude);
+    return '${distanceInKm.toStringAsFixed(1)}km';
+  }
 }
