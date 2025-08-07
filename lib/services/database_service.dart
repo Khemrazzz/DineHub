@@ -1,4 +1,7 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' show Platform;
 import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import '../models/restaurant.dart';
 import '../models/menu_item.dart';
@@ -12,14 +15,27 @@ class DatabaseService {
 
   factory DatabaseService() => _instance;
 
-  Future<Database> get database async {
-    if (_database != null) return _database!;
+  Future<Database?> get database async {
+    if (_database != null) return _database;
     _database = await _initDatabase();
-    return _database!;
+    return _database;
   }
 
-  Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'dinehub.db');
+  Future<Database?> _initDatabase() async {
+    if (kIsWeb) {
+      // sqflite is not supported on the web
+      return null;
+    }
+
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      // Initialize FFI for desktop platforms
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+    }
+
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, 'dinehub.db');
+
     return await openDatabase(
       path,
       version: 1,
@@ -167,12 +183,14 @@ class DatabaseService {
   // Restaurant CRUD operations
   Future<List<Restaurant>> getRestaurants() async {
     final db = await database;
+    if (db == null) return [];
     final List<Map<String, dynamic>> maps = await db.query('restaurants');
     return List.generate(maps.length, (i) => Restaurant.fromMap(maps[i]));
   }
 
   Future<List<Restaurant>> searchRestaurants(String query) async {
     final db = await database;
+    if (db == null) return [];
     final List<Map<String, dynamic>> maps = await db.query(
       'restaurants',
       where: 'name LIKE ? OR cuisine LIKE ?',
@@ -183,6 +201,7 @@ class DatabaseService {
 
   Future<Restaurant?> getRestaurant(int id) async {
     final db = await database;
+    if (db == null) return null;
     final List<Map<String, dynamic>> maps = await db.query(
       'restaurants',
       where: 'id = ?',
@@ -197,6 +216,7 @@ class DatabaseService {
   // Menu items operations
   Future<List<MenuItem>> getMenuItems(int restaurantId) async {
     final db = await database;
+    if (db == null) return [];
     final List<Map<String, dynamic>> maps = await db.query(
       'menu_items',
       where: 'restaurantId = ?',
@@ -208,6 +228,7 @@ class DatabaseService {
   // Review operations
   Future<List<Review>> getReviews(int restaurantId) async {
     final db = await database;
+    if (db == null) return [];
     final List<Map<String, dynamic>> maps = await db.query(
       'reviews',
       where: 'restaurantId = ?',
@@ -219,16 +240,18 @@ class DatabaseService {
 
   Future<int> addReview(Review review) async {
     final db = await database;
+    if (db == null) return 0;
     int reviewId = await db.insert('reviews', review.toMap());
-    
+
     // Update restaurant rating
     await _updateRestaurantRating(review.restaurantId);
-    
+
     return reviewId;
   }
 
   Future<void> _updateRestaurantRating(int restaurantId) async {
     final db = await database;
+    if (db == null) return;
     final List<Map<String, dynamic>> reviews = await db.rawQuery('''
       SELECT AVG(rating) as avgRating, COUNT(*) as reviewCount
       FROM reviews
@@ -238,7 +261,7 @@ class DatabaseService {
     if (reviews.isNotEmpty) {
       double avgRating = reviews[0]['avgRating'] ?? 0.0;
       int reviewCount = reviews[0]['reviewCount'] ?? 0;
-      
+
       await db.update(
         'restaurants',
         {'rating': avgRating, 'reviewCount': reviewCount},
