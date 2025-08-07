@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/restaurant.dart';
+import '../providers/restaurant_provider.dart';
 
 class EditRestaurantScreen extends StatefulWidget {
   final Restaurant restaurant;
@@ -44,7 +46,23 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () async {
+                final updated = Restaurant(
+                  id: widget.restaurant.id,
+                  name: _nameController.text,
+                  address: _addressController.text,
+                  cuisine: _cuisineController.text,
+                  latitude: widget.restaurant.latitude,
+                  longitude: widget.restaurant.longitude,
+                  imageUrl: widget.restaurant.imageUrl,
+                  description: widget.restaurant.description,
+                  rating: widget.restaurant.rating,
+                  reviewCount: widget.restaurant.reviewCount,
+                );
+                await Provider.of<RestaurantProvider>(context, listen: false)
+                    .updateRestaurant(updated, context);
+                Navigator.pop(context);
+              },
               child: const Text('Update'),
             ),
           ],
