@@ -17,15 +17,19 @@ class RestaurantProvider with ChangeNotifier {
 
   final DatabaseService _databaseService = DatabaseService();
 
-  Future<void> loadRestaurants() async {
+  Future<void> loadRestaurants(BuildContext context) async {
     _isLoading = true;
     notifyListeners();
 
     try {
       _restaurants = await _databaseService.getRestaurants();
       _filteredRestaurants = _restaurants;
-    } catch (e) {
+    } catch (e, stack) {
       debugPrint('Error loading restaurants: $e');
+      debugPrintStack(stackTrace: stack);
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        const SnackBar(content: Text('Failed to load restaurants')),
+      );
     }
 
     _isLoading = false;
@@ -46,20 +50,28 @@ class RestaurantProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loadMenuItems(int restaurantId) async {
+  Future<void> loadMenuItems(int restaurantId, BuildContext context) async {
     try {
       _currentMenuItems = await _databaseService.getMenuItems(restaurantId);
       notifyListeners();
-    } catch (e) {
+    } catch (e, stack) {
       debugPrint('Error loading menu items: $e');
+      debugPrintStack(stackTrace: stack);
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        const SnackBar(content: Text('Failed to load menu items')),
+      );
     }
   }
 
-  Future<Restaurant?> getRestaurant(int id) async {
+  Future<Restaurant?> getRestaurant(int id, BuildContext context) async {
     try {
       return await _databaseService.getRestaurant(id);
-    } catch (e) {
+    } catch (e, stack) {
       debugPrint('Error getting restaurant: $e');
+      debugPrintStack(stackTrace: stack);
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        const SnackBar(content: Text('Failed to load restaurant')),
+      );
       return null;
     }
   }
