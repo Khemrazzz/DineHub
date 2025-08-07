@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/restaurant.dart';
+import '../providers/restaurant_provider.dart';
 
 class AddRestaurantScreen extends StatefulWidget {
   const AddRestaurantScreen({super.key});
@@ -34,7 +37,20 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () async {
+                final restaurant = Restaurant(
+                  name: _nameController.text,
+                  address: _addressController.text,
+                  cuisine: _cuisineController.text,
+                  latitude: 0.0,
+                  longitude: 0.0,
+                  imageUrl: '',
+                  description: '',
+                );
+                await Provider.of<RestaurantProvider>(context, listen: false)
+                    .addRestaurant(restaurant, context);
+                Navigator.pop(context);
+              },
               child: const Text('Save'),
             ),
           ],

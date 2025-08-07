@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/restaurant.dart';
-import '../services/database_service.dart';
+import '../providers/restaurant_provider.dart';
 import 'add_restaurant.dart';
 import 'edit_restaurant.dart';
 import 'manage_menus.dart';
@@ -13,18 +14,17 @@ class ManageRestaurantsScreen extends StatefulWidget {
 }
 
 class _ManageRestaurantsScreenState extends State<ManageRestaurantsScreen> {
-  final DatabaseService _service = DatabaseService();
-  List<Restaurant> _restaurants = [];
-
   @override
   void initState() {
     super.initState();
-    _load();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _load();
+    });
   }
 
   Future<void> _load() async {
-    final data = await _service.getRestaurants();
-    setState(() => _restaurants = data);
+    await Provider.of<RestaurantProvider>(context, listen: false)
+        .loadRestaurants(context);
   }
 
   void _confirmDelete(Restaurant restaurant) {
@@ -35,7 +35,15 @@ class _ManageRestaurantsScreenState extends State<ManageRestaurantsScreen> {
         content: Text('Remove ${restaurant.name}?'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Delete')),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await Provider.of<RestaurantProvider>(context, listen: false)
+                  .deleteRestaurant(restaurant.id!, context);
+              await _load();
+            },
+            child: const Text('Delete'),
+          ),
         ],
       ),
     );
@@ -46,60 +54,71 @@ class _ManageRestaurantsScreenState extends State<ManageRestaurantsScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Manage Restaurants')),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          await Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const AddRestaurantScreen()),
           );
+          await _load();
         },
         child: const Icon(Icons.add),
       ),
-      body: _restaurants.isEmpty
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: _restaurants.length,
-              itemBuilder: (context, index) {
-                final r = _restaurants[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: ListTile(
-                    title: Text(r.name),
-                    subtitle: Text(r.cuisine),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.restaurant_menu),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ManageMenusScreen(restaurant: r),
-                              ),
-                            );
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => EditRestaurantScreen(restaurant: r),
-                              ),
-                            );
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () => _confirmDelete(r),
-                        ),
-                      ],
-                    ),
+      body: Consumer<RestaurantProvider>(
+        builder: (context, provider, _) {
+          if (provider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final restaurants = provider.restaurants;
+          if (restaurants.isEmpty) {
+            return const Center(child: Text('No restaurants'));
+          }
+          return ListView.builder(
+            itemCount: restaurants.length,
+            itemBuilder: (context, index) {
+              final r = restaurants[index];
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: ListTile(
+                  title: Text(r.name),
+                  subtitle: Text(r.cuisine),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.restaurant_menu),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ManageMenusScreen(restaurant: r),
+                            ),
+                          );
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => EditRestaurantScreen(restaurant: r),
+                            ),
+                          );
+                          await _load();
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () => _confirmDelete(r),
+                      ),
+                    ],
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

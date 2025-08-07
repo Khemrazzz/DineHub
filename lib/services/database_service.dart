@@ -213,6 +213,33 @@ class DatabaseService {
     return null;
   }
 
+  Future<int> insertRestaurant(Restaurant restaurant) async {
+    final db = await database;
+    if (db == null) return 0;
+    return await db.insert('restaurants', restaurant.toMap());
+  }
+
+  Future<void> updateRestaurant(Restaurant restaurant) async {
+    final db = await database;
+    if (db == null || restaurant.id == null) return;
+    await db.update(
+      'restaurants',
+      restaurant.toMap(),
+      where: 'id = ?',
+      whereArgs: [restaurant.id],
+    );
+  }
+
+  Future<void> deleteRestaurant(int id) async {
+    final db = await database;
+    if (db == null) return;
+    await db.delete(
+      'restaurants',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
   // Menu items operations
   Future<List<MenuItem>> getMenuItems(int restaurantId) async {
     final db = await database;

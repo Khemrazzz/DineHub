@@ -76,6 +76,65 @@ class RestaurantProvider with ChangeNotifier {
     }
   }
 
+  Future<void> addRestaurant(Restaurant restaurant, BuildContext context) async {
+    try {
+      int id = await _databaseService.insertRestaurant(restaurant);
+      if (id > 0) {
+        final newRestaurant = Restaurant(
+          id: id,
+          name: restaurant.name,
+          address: restaurant.address,
+          cuisine: restaurant.cuisine,
+          latitude: restaurant.latitude,
+          longitude: restaurant.longitude,
+          imageUrl: restaurant.imageUrl,
+          description: restaurant.description,
+          rating: restaurant.rating,
+          reviewCount: restaurant.reviewCount,
+        );
+        _restaurants.add(newRestaurant);
+        searchRestaurants(_searchQuery);
+      }
+    } catch (e, stack) {
+      debugPrint('Error adding restaurant: $e');
+      debugPrintStack(stackTrace: stack);
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        const SnackBar(content: Text('Failed to add restaurant')),
+      );
+    }
+  }
+
+  Future<void> updateRestaurant(Restaurant restaurant, BuildContext context) async {
+    try {
+      await _databaseService.updateRestaurant(restaurant);
+      int index = _restaurants.indexWhere((r) => r.id == restaurant.id);
+      if (index != -1) {
+        _restaurants[index] = restaurant;
+        searchRestaurants(_searchQuery);
+      }
+    } catch (e, stack) {
+      debugPrint('Error updating restaurant: $e');
+      debugPrintStack(stackTrace: stack);
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        const SnackBar(content: Text('Failed to update restaurant')),
+      );
+    }
+  }
+
+  Future<void> deleteRestaurant(int id, BuildContext context) async {
+    try {
+      await _databaseService.deleteRestaurant(id);
+      _restaurants.removeWhere((r) => r.id == id);
+      searchRestaurants(_searchQuery);
+    } catch (e, stack) {
+      debugPrint('Error deleting restaurant: $e');
+      debugPrintStack(stackTrace: stack);
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        const SnackBar(content: Text('Failed to delete restaurant')),
+      );
+    }
+  }
+
   void updateRestaurantRating(int restaurantId, double newRating, int newReviewCount) {
     int index = _restaurants.indexWhere((r) => r.id == restaurantId);
     if (index != -1) {
