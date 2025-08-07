@@ -22,10 +22,30 @@ class _MapScreenState extends State<MapScreen> {
   Set<Marker> _markers = {};
   LatLng _initialPosition = const LatLng(-20.1609, 57.5012); // Port Louis, Mauritius
 
+  bool _permissionDenied = false; // Tracks if location permission was denied
+
   @override
   void initState() {
     super.initState();
-    _initializeMap();
+    _checkPermissionAndInitialize();
+  }
+
+  /// Requests location permission before initializing the map.
+  ///
+  /// If permission is denied, a fallback UI is shown instead of the map.
+  Future<void> _checkPermissionAndInitialize() async {
+    // Ask for location access prior to any map setup so we can safely
+    // enable features like `myLocationEnabled`.
+    final hasPermission = await LocationService().requestLocationPermission();
+
+    if (hasPermission) {
+      await _initializeMap(); // Permission granted, proceed with map setup
+    } else {
+      // Permission denied – show a message instead of the interactive map
+      setState(() {
+        _permissionDenied = true;
+      });
+    }
   }
 
   Future<void> _initializeMap() async {
@@ -95,29 +115,36 @@ class _MapScreenState extends State<MapScreen> {
           ),
         ),
       ),
-      body: Stack(
-        children: [
-          GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: _initialPosition,
-              zoom: widget.restaurant != null ? 16.0 : 12.0,
-            ),
-            markers: _markers,
-            onMapCreated: (GoogleMapController controller) {
-              _mapController = controller;
-            },
-            myLocationEnabled: true,
-            myLocationButtonEnabled: true,
-            compassEnabled: true,
-            mapType: MapType.normal,
-          ),
-          if (widget.restaurant != null)
-            Positioned(
-              bottom: 16,
-              left: 16,
-              right: 16,
-              child: Card(
-                child: Padding(
+      body: _permissionDenied
+          ? const Center(
+              child: Text(
+                'Location permission denied. Please enable location services to view the map.',
+                textAlign: TextAlign.center,
+              ),
+            )
+          : Stack(
+              children: [
+                GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: _initialPosition,
+                    zoom: widget.restaurant != null ? 16.0 : 12.0,
+                  ),
+                  markers: _markers,
+                  onMapCreated: (GoogleMapController controller) {
+                    _mapController = controller;
+                  },
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: true,
+                  compassEnabled: true,
+                  mapType: MapType.normal,
+                ),
+                if (widget.restaurant != null)
+                  Positioned(
+                    bottom: 16,
+                    left: 16,
+                    right: 16,
+                    child: Card(
+                      child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
