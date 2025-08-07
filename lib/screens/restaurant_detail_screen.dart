@@ -29,7 +29,7 @@ class RestaurantDetailScreen extends StatelessWidget {
           const SizedBox(height: 8),
           ...restaurant.menu.map((item) => ListTile(
                 title: Text(item.name),
-                trailing: Text('\\$${item.price.toStringAsFixed(2)}'),
+                trailing: Text('\\${item.price.toStringAsFixed(2)}'),
               )),
           const SizedBox(height: 16),
           ElevatedButton(

@@ -39,7 +39,7 @@ class _ManageMenusScreenState extends State<ManageMenusScreen> {
           final item = _menu[index];
           return ListTile(
             title: Text(item.name),
-            subtitle: Text('\\$${item.price.toStringAsFixed(2)}'),
+            subtitle: Text('\\${item.price.toStringAsFixed(2)}'),
             trailing: IconButton(
               icon: const Icon(Icons.delete),
               onPressed: () => setState(() => _menu.removeAt(index)),
