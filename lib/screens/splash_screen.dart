@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'home_screen.dart';
+import '../providers/restaurant_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -12,12 +14,21 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 2), () {
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    // Load restaurants
+    await Provider.of<RestaurantProvider>(context, listen: false).loadRestaurants();
+    
+    // Navigate to home screen after 2 seconds
+    await Future.delayed(const Duration(seconds: 2));
+    if (mounted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
-    });
+    }
   }
 
   @override
@@ -37,10 +48,29 @@ class _SplashScreenState extends State<SplashScreen> {
             children: [
               Text(
                 '🍽️',
-                style: TextStyle(fontSize: 64),
+                style: TextStyle(fontSize: 80),
               ),
-              SizedBox(height: 16),
-              CircularProgressIndicator(color: Colors.white),
+              SizedBox(height: 24),
+              Text(
+                'DineHub',
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Discover Amazing Restaurants',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white70,
+                ),
+              ),
+              SizedBox(height: 32),
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
             ],
           ),
         ),
