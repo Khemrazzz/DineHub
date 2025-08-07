@@ -29,7 +29,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   }
 
   void _showAddReviewDialog() {
-    int rating = 5;
+    int rating = 1;
     final TextEditingController commentController = TextEditingController();
     final TextEditingController nameController = TextEditingController();
 
@@ -52,11 +52,11 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('Rating (0-10):'),
+              const Text('Rating (1-10):'),
               const SizedBox(height: 8),
               Slider(
                 value: rating.toDouble(),
-                min: 0,
+                min: 1,
                 max: 10,
                 divisions: 10,
                 label: rating.toString(),
@@ -90,6 +90,14 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                 if (nameController.text.trim().isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Please enter your name')),
+                  );
+                  return;
+                }
+
+                if (rating < 1 || rating > 10) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Rating must be between 1 and 10')),
                   );
                   return;
                 }
