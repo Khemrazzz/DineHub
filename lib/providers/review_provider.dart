@@ -11,28 +11,36 @@ class ReviewProvider with ChangeNotifier {
 
   final DatabaseService _databaseService = DatabaseService();
 
-  Future<void> loadReviews(int restaurantId) async {
+  Future<void> loadReviews(int restaurantId, BuildContext context) async {
     _isLoading = true;
     notifyListeners();
 
     try {
       _reviews = await _databaseService.getReviews(restaurantId);
-    } catch (e) {
+    } catch (e, stack) {
       debugPrint('Error loading reviews: $e');
+      debugPrintStack(stackTrace: stack);
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        const SnackBar(content: Text('Failed to load reviews')),
+      );
     }
 
     _isLoading = false;
     notifyListeners();
   }
 
-  Future<bool> addReview(Review review) async {
+  Future<bool> addReview(Review review, BuildContext context) async {
     try {
       await _databaseService.addReview(review);
       // Reload reviews to get the updated list
-      await loadReviews(review.restaurantId);
+      await loadReviews(review.restaurantId, context);
       return true;
-    } catch (e) {
+    } catch (e, stack) {
       debugPrint('Error adding review: $e');
+      debugPrintStack(stackTrace: stack);
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        const SnackBar(content: Text('Failed to add review')),
+      );
       return false;
     }
   }

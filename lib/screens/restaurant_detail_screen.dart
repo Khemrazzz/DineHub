@@ -22,9 +22,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<RestaurantProvider>(context, listen: false)
-          .loadMenuItems(widget.restaurant.id!);
+          .loadMenuItems(widget.restaurant.id!, context);
       Provider.of<ReviewProvider>(context, listen: false)
-          .loadReviews(widget.restaurant.id!);
+          .loadReviews(widget.restaurant.id!, context);
     });
   }
 
@@ -110,12 +110,12 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                 );
 
                 final success = await Provider.of<ReviewProvider>(context, listen: false)
-                    .addReview(review);
+                    .addReview(review, context);
 
                 if (success) {
                   // Update restaurant rating in provider
                   final updatedRestaurant = await Provider.of<RestaurantProvider>(context, listen: false)
-                      .getRestaurant(widget.restaurant.id!);
+                      .getRestaurant(widget.restaurant.id!, context);
                   if (updatedRestaurant != null) {
                     Provider.of<RestaurantProvider>(context, listen: false)
                         .updateRestaurantRating(

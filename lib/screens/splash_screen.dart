@@ -18,7 +18,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _initializeApp() async {
     // Load restaurants
-    await Provider.of<RestaurantProvider>(context, listen: false).loadRestaurants();
+    await Provider.of<RestaurantProvider>(context, listen: false)
+        .loadRestaurants(context);
     
     // Navigate to login screen after 2 seconds
     await Future.delayed(const Duration(seconds: 2));
