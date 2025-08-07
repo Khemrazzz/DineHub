@@ -7,6 +7,7 @@ import '../services/location_service.dart';
 import '../widgets/bottom_navigation.dart';
 import 'home_screen.dart';
 import 'about_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MapScreen extends StatefulWidget {
   final Restaurant? restaurant;
@@ -20,7 +21,10 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   GoogleMapController? _mapController;
   Set<Marker> _markers = {};
-  LatLng _initialPosition = const LatLng(-20.1609, 57.5012); // Port Louis, Mauritius
+  LatLng _initialPosition = const LatLng(
+    -20.1609,
+    57.5012,
+  ); // Port Louis, Mauritius
 
   bool _permissionDenied = false; // Tracks if location permission was denied
 
@@ -51,11 +55,17 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _initializeMap() async {
     if (widget.restaurant != null) {
       // Show single restaurant
-      _initialPosition = LatLng(widget.restaurant!.latitude, widget.restaurant!.longitude);
+      _initialPosition = LatLng(
+        widget.restaurant!.latitude,
+        widget.restaurant!.longitude,
+      );
       _markers = {
         Marker(
           markerId: MarkerId('restaurant_${widget.restaurant!.id}'),
-          position: LatLng(widget.restaurant!.latitude, widget.restaurant!.longitude),
+          position: LatLng(
+            widget.restaurant!.latitude,
+            widget.restaurant!.longitude,
+          ),
           infoWindow: InfoWindow(
             title: widget.restaurant!.name,
             snippet: widget.restaurant!.cuisine,
@@ -65,14 +75,18 @@ class _MapScreenState extends State<MapScreen> {
       };
     } else {
       // Show all restaurants
-      final restaurants = Provider.of<RestaurantProvider>(context, listen: false).restaurants;
+      final restaurants = Provider.of<RestaurantProvider>(
+        context,
+        listen: false,
+      ).restaurants;
       _markers = restaurants.map((restaurant) {
         return Marker(
           markerId: MarkerId('restaurant_${restaurant.id}'),
           position: LatLng(restaurant.latitude, restaurant.longitude),
           infoWindow: InfoWindow(
             title: restaurant.name,
-            snippet: '${restaurant.cuisine} • ${restaurant.rating.toStringAsFixed(1)}⭐',
+            snippet:
+                '${restaurant.cuisine} • ${restaurant.rating.toStringAsFixed(1)}⭐',
           ),
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
         );
@@ -89,7 +103,9 @@ class _MapScreenState extends State<MapScreen> {
             markerId: const MarkerId('current_location'),
             position: LatLng(position.latitude, position.longitude),
             infoWindow: const InfoWindow(title: 'Your Location'),
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueBlue,
+            ),
           ),
         );
       }
@@ -145,72 +161,95 @@ class _MapScreenState extends State<MapScreen> {
                     right: 16,
                     child: Card(
                       child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.restaurant!.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.restaurant!.name,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              widget.restaurant!.address,
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    onPressed: () async {
+                                      final Uri mapsUrl = Uri.parse(
+                                        'https://www.google.com/maps/search/?api=1&query='
+                                        '${widget.restaurant!.latitude},'
+                                        '${widget.restaurant!.longitude}',
+                                      );
+                                      if (!await launchUrl(
+                                        mapsUrl,
+                                        mode: LaunchMode.externalApplication,
+                                      )) {
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'Could not open the maps application.',
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    },
+                                    icon: const Icon(Icons.directions),
+                                    label: const Text('Directions'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Theme.of(
+                                        context,
+                                      ).primaryColor,
+                                      foregroundColor: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      // In a real app, you would open the phone dialer
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Opening phone dialer...',
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    icon: const Icon(Icons.phone),
+                                    label: const Text('Call'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Theme.of(
+                                        context,
+                                      ).colorScheme.secondary,
+                                      foregroundColor: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        widget.restaurant!.address,
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () async {
-                                // In a real app, you would open the default maps app
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Opening directions in maps app...'),
-                                  ),
-                                );
-                              },
-                              icon: const Icon(Icons.directions),
-                              label: const Text('Directions'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Theme.of(context).primaryColor,
-                                foregroundColor: Colors.white,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () {
-                                // In a real app, you would open the phone dialer
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Opening phone dialer...'),
-                                  ),
-                                );
-                              },
-                              icon: const Icon(Icons.phone),
-                              label: const Text('Call'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Theme.of(context).colorScheme.secondary,
-                                foregroundColor: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
+              ],
             ),
-        ],
-      ),
       bottomNavigationBar: widget.restaurant == null
           ? BottomNavigation(
               currentIndex: 1,
@@ -219,13 +258,17 @@ class _MapScreenState extends State<MapScreen> {
                   case 0:
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => const HomeScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => const HomeScreen(),
+                      ),
                     );
                     break;
                   case 2:
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const AboutScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => const AboutScreen(),
+                      ),
                     );
                     break;
                 }
