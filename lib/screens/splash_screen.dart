@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'home_screen.dart';
 import '../providers/restaurant_provider.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -21,13 +20,10 @@ class _SplashScreenState extends State<SplashScreen> {
     // Load restaurants
     await Provider.of<RestaurantProvider>(context, listen: false).loadRestaurants();
     
-    // Navigate to home screen after 2 seconds
+    // Navigate to login screen after 2 seconds
     await Future.delayed(const Duration(seconds: 2));
     if (mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
+      Navigator.pushReplacementNamed(context, '/login');
     }
   }
 
