@@ -1,14 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import '../models/restaurant.dart';
 import '../screens/restaurant_detail_screen.dart';
+import '../services/location_service.dart';
 
-class RestaurantCard extends StatelessWidget {
+class RestaurantCard extends StatefulWidget {
   final Restaurant restaurant;
 
   const RestaurantCard({super.key, required this.restaurant});
 
   @override
+  State<RestaurantCard> createState() => _RestaurantCardState();
+}
+
+class _RestaurantCardState extends State<RestaurantCard> {
+  late final Future<Position?> _positionFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _positionFuture = LocationService().getCurrentPosition();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final restaurant = widget.restaurant;
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 4,
@@ -110,12 +126,22 @@ class RestaurantCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          restaurant.distance,
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 11,
-                          ),
+                        FutureBuilder<Position?>(
+                          future: _positionFuture,
+                          builder: (context, snapshot) {
+                            String distance = '...';
+                            if (snapshot.hasData) {
+                              distance = restaurant.distance(
+                                  snapshot.data!.latitude, snapshot.data!.longitude);
+                            }
+                            return Text(
+                              distance,
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 11,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
