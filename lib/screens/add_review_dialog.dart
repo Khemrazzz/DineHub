@@ -1,17 +1,47 @@
 import 'package:flutter/material.dart';
+import '../models/restaurant_model.dart';
 
-class AddReviewDialog extends StatelessWidget {
-  const AddReviewDialog({super.key});
+class AddReviewDialog extends StatefulWidget {
+  final Restaurant restaurant;
+  const AddReviewDialog({super.key, required this.restaurant});
+
+  @override
+  State<AddReviewDialog> createState() => _AddReviewDialogState();
+}
+
+class _AddReviewDialogState extends State<AddReviewDialog> {
+  double _rating = 5;
+  final TextEditingController _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Add Review'),
-      content: const Text('Review form goes here'),
+      title: Text('Review ${widget.restaurant.name}'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Slider(
+            value: _rating,
+            min: 0,
+            max: 10,
+            divisions: 10,
+            label: _rating.round().toString(),
+            onChanged: (v) => setState(() => _rating = v),
+          ),
+          TextField(
+            controller: _controller,
+            decoration: const InputDecoration(hintText: 'Comment (optional)'),
+          ),
+        ],
+      ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Close'),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Submit'),
         ),
       ],
     );
