@@ -56,6 +56,18 @@ class _HomeScreenState extends State<HomeScreen> {
               decoration: InputDecoration(
                 hintText: 'Search restaurants...',
                 prefixIcon: const Icon(Icons.search, color: Colors.white70),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, color: Colors.white70),
+                        onPressed: () {
+                          _searchController.clear();
+                          Provider.of<RestaurantProvider>(context,
+                                  listen: false)
+                              .searchRestaurants('');
+                          setState(() {});
+                        },
+                      )
+                    : null,
                 filled: true,
                 fillColor: Colors.white.withOpacity(0.2),
                 border: OutlineInputBorder(
@@ -66,6 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               style: const TextStyle(color: Colors.white),
               onChanged: (value) {
+                setState(() {});
                 Provider.of<RestaurantProvider>(context, listen: false)
                     .searchRestaurants(value);
               },
