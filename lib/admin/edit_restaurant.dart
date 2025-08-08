@@ -65,6 +65,28 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
                   child: kIsWeb
                       ? Image.network(widget.restaurant.imageUrl)
                       : Image.file(io.File(widget.restaurant.imageUrl)),
+                )
+              else
+                Container(
+                  height: 150,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).primaryColor,
+                        Theme.of(context).colorScheme.secondary,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.restaurant,
+                      size: 80,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ElevatedButton(
                 onPressed: () async {
