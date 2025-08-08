@@ -1,3 +1,6 @@
+import 'dart:io' as io;
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../models/restaurant.dart';
@@ -45,27 +48,45 @@ class _RestaurantCardState extends State<RestaurantCard> {
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              // Restaurant Icon
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
+              // Restaurant Image or Placeholder
+              if (restaurant.imageUrl.isNotEmpty)
+                ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).primaryColor,
-                      Theme.of(context).colorScheme.secondary,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                  child: kIsWeb
+                      ? Image.network(
+                          restaurant.imageUrl,
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                        )
+                      : Image.file(
+                          io.File(restaurant.imageUrl),
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                        ),
+                )
+              else
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).primaryColor,
+                        Theme.of(context).colorScheme.secondary,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.restaurant,
+                    color: Colors.white,
+                    size: 30,
                   ),
                 ),
-                child: const Icon(
-                  Icons.restaurant,
-                  color: Colors.white,
-                  size: 30,
-                ),
-              ),
               
               const SizedBox(width: 12),
               

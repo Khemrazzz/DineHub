@@ -1,3 +1,6 @@
+import 'dart:io' as io;
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/restaurant.dart';
@@ -163,27 +166,42 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Restaurant Header
-            Container(
-              height: 200,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Theme.of(context).primaryColor,
-                    Theme.of(context).colorScheme.secondary,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+            if (widget.restaurant.imageUrl.isNotEmpty)
+              kIsWeb
+                  ? Image.network(
+                      widget.restaurant.imageUrl,
+                      height: 200,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    )
+                  : Image.file(
+                      io.File(widget.restaurant.imageUrl),
+                      height: 200,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    )
+            else
+              Container(
+                height: 200,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Theme.of(context).primaryColor,
+                      Theme.of(context).colorScheme.secondary,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.restaurant,
+                    size: 80,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-              child: const Center(
-                child: Icon(
-                  Icons.restaurant,
-                  size: 80,
-                  color: Colors.white,
-                ),
-              ),
-            ),
             
             Padding(
               padding: const EdgeInsets.all(16),

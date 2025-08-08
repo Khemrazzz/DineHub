@@ -49,6 +49,28 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
                   child: kIsWeb
                       ? Image.network(_imageFile!.path)
                       : Image.file(io.File(_imageFile!.path)),
+                )
+              else
+                Container(
+                  height: 150,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).primaryColor,
+                        Theme.of(context).colorScheme.secondary,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.restaurant,
+                      size: 80,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ElevatedButton(
                 onPressed: () async {
